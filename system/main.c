@@ -15,15 +15,48 @@
  */
 #include "bsp_common.h"
 
+void GPIO_Init()
+{
+    GPIO_InitTypeDef  GPIO_InitStruct;
+
+    /* Enable the GPIOA Clock */
+    __GPIOA_CLK_ENABLE();
+
+    /* Configure the GPIOA_0 pin */
+    GPIO_InitStruct.Pin = GPIO_PIN_0;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
+
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET);
+	
+		/* Configure the GPIOA_1 pin */
+    GPIO_InitStruct.Pin = GPIO_PIN_1;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
+
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	
+	
+}
+
 int main(void)
 {
+		uint32_t temp_i = 0;
 		bsp_init();
     dispatch_init();
     on_ready();
+	  GPIO_Init();
+	
     while(1)
-  	 {
-        HCI_Process();
-        dispatch();
+  	{
+				if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1)) {
+						temp_i++;
+						printf("ok : %d!\r\n", temp_i);
+						HAL_Delay(20);
+				}
     }
 }
 
