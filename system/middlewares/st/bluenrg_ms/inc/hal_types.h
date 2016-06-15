@@ -16,6 +16,8 @@
 #ifndef __HAL_TYPES_H__
 #define __HAL_TYPES_H__
 
+#include <stdint.h>
+
 #ifndef NULL
 #define NULL ((void *)0)
 #endif

@@ -18,6 +18,18 @@
 
 #include <compiler.h>
 
+/** @addtogroup Middlewares
+ *  @{
+ */
+
+/** @defgroup ST
+ *  @{
+ */
+ 
+/** @defgroup SimpleBlueNRG_HCI
+ *  @{
+ */
+ 
 /**
  * @defgroup Updater Updater
  * @brief Updater.
@@ -73,6 +85,17 @@ typedef __packed struct _evt_blue_initialized{
  * @}
  */
 
+ /**
+ * @}
+ */
+
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
 
 
 #endif /* __BLUENRG_UPDATER_ACI_H__ */

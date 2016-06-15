@@ -32,8 +32,7 @@
  *
  */
 
-#include "bsp_common.h"
-#include "clock.h"
+#include "ble_clock.h"
 #include "gp_timer.h"
 
 /*---------------------------------------------------------------------------*/

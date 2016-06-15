@@ -16,6 +16,18 @@
 #ifndef __BLUENRG_HAL_ACI_H__
 #define __BLUENRG_HAL_ACI_H__
 
+/** @addtogroup Middlewares
+ *  @{
+ */
+
+/** @defgroup ST
+ *  @{
+ */
+ 
+/** @defgroup SimpleBlueNRG_HCI
+ *  @{
+ */
+ 
 /**
  *@addtogroup HAL HAL
  *@brief Hardware Abstraction Layer.
@@ -153,5 +165,16 @@ tBleStatus aci_hal_tone_stop(void);
  * @}
  */
 
+ /**
+ * @}
+ */
+
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
 
 #endif /* __BLUENRG_HAL_ACI_H__ */

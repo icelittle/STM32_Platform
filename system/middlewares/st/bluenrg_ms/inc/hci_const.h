@@ -12,7 +12,7 @@
 
 #include "compiler.h"
 #include "hal_types.h"
-#include "clock.h"
+#include "ble_clock.h"
 #include "link_layer.h"
 
 #include "hci.h"

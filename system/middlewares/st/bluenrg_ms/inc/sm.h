@@ -19,6 +19,17 @@
 /******************************************************************************
 * Macros
 *****************************************************************************/
+/** @addtogroup Middlewares
+ *  @{
+ */
+
+/** @defgroup ST
+ *  @{
+ */
+ 
+/** @defgroup SimpleBlueNRG_HCI
+ *  @{
+ */
 
 /**
  *@addtogroup GAP GAP
@@ -101,7 +112,7 @@
  * @name Use fixed pin
  * @{
  */
-#define USE_FIXED_PIN_FOR_PAIRING		(0x0)
+#define USE_FIXED_PIN_FOR_PAIRING		(0x00)
 #define DONOT_USE_FIXED_PIN_FOR_PAIRING	(0x01)
 /**
  * @}
@@ -155,4 +166,16 @@
  * @}
  */
 
+ /**
+ * @}
+ */
+
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
+ 
 #endif /* __SM_H__ */

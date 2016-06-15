@@ -20,6 +20,18 @@
 
 #include <ble_status.h>
 
+/** @addtogroup Middlewares
+ *  @{
+ */
+
+/** @defgroup ST
+ *  @{
+ */
+ 
+/** @defgroup SimpleBlueNRG_HCI
+ *  @{
+ */
+ 
 /**
  *@addtogroup GAP GAP
  *@brief API for GAP layer.
@@ -156,6 +168,17 @@ typedef	uint8_t	tBDAddr[6];
 /**
  * @}
  */
+ 
+/**
+ * @}
+ */
 
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
 
 #endif /* _LINK_LAYER_H */

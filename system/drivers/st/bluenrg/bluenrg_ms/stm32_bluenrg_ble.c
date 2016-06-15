@@ -35,6 +35,7 @@
   ******************************************************************************
   */ 
   
+/* Includes ------------------------------------------------------------------*/
 #include "bsp_common.h"
 #include "stm32_bluenrg_ble.h"
 #include "gp_timer.h"
@@ -195,7 +196,36 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
 void Hal_Write_Serial(const void* data1, const void* data2, int32_t n_bytes1,
                       int32_t n_bytes2)
 {
+#ifdef OPTIMIZED_SPI /* used by the server (L0 and F4, not L4) for the throughput test */
   struct timer t;
+  int ret;
+  uint8_t data2_offset = 0;
+  
+  Timer_Set(&t, CLOCK_SECOND/10);
+  
+  Disable_SPI_IRQ();
+  
+  while(1){
+    ret = BlueNRG_SPI_Write(&SpiHandle, (uint8_t *)data1,(uint8_t *)data2 + data2_offset, n_bytes1, n_bytes2);
+    
+    if(ret >= 0){      
+      n_bytes1 = 0;
+      n_bytes2 -= ret;
+      data2_offset += ret;
+      if(n_bytes2==0)
+        break;
+    }
+    
+    if(Timer_Expired(&t)){
+      break;
+    }
+  }
+  
+  Enable_SPI_IRQ();
+  
+#else /* not OPTIMIZED_SPI */
+  struct timer t;
+
   Timer_Set(&t, CLOCK_SECOND/10);
 
 #ifdef PRINT_CSV_FORMAT
@@ -215,6 +245,7 @@ void Hal_Write_Serial(const void* data1, const void* data2, int32_t n_bytes1,
       break;
     }
   }
+#endif /* OPTIMIZED_SPI */
 }
 
 /**
@@ -239,6 +270,13 @@ void BNRG_SPI_Init(void)
   SpiHandle.Init.CRCCalculation = BNRG_SPI_CRCCALCULATION;
   
   HAL_SPI_Init(&SpiHandle);
+	
+#ifdef OPTIMIZED_SPI /* used by the server (L0 and F4, not L4) for the throughput test */
+  /* Added HAP to enable SPI since Optimized SPI Transmit, Receive and Transmit/Receive APIs are 
+     used for BlueNRG, BlueNRG-MS SPI communication in order to get the best performance in terms of 
+     BLE throughput */
+  __HAL_SPI_ENABLE(&SpiHandle);
+#endif
 }
 
 /**
@@ -275,9 +313,11 @@ uint8_t BlueNRG_DataPresent(void)
  */
 void BlueNRG_HW_Bootloader(void)
 {
+  Disable_SPI_IRQ();
   set_irq_as_output();
   BlueNRG_RST();
   set_irq_as_input();
+  Enable_SPI_IRQ();
 }
 
 /**
@@ -290,6 +330,55 @@ void BlueNRG_HW_Bootloader(void)
 int32_t BlueNRG_SPI_Read_All(SPI_HandleTypeDef *hspi, uint8_t *buffer,
                              uint8_t buff_size)
 {
+#ifdef OPTIMIZED_SPI /* used by the server (L0 and F4, not L4) for the throughput test */
+  uint16_t byte_count;
+  uint8_t len = 0;
+  
+  const uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
+  uint8_t header_slave[5];
+  
+  __disable_irq();
+  
+  HAL_GPIO_WritePin(BNRG_SPI_CS_PORT, BNRG_SPI_CS_PIN, GPIO_PIN_RESET);
+  
+  /* Read the header */
+  HAL_SPI_TransmitReceive_Opt(hspi, header_master, header_slave, HEADER_SIZE);
+  
+  if (header_slave[0] == 0x02) {
+    // device is ready
+    
+    byte_count = (header_slave[4]<<8)|header_slave[3];
+    
+    if (byte_count > 0) {
+      
+      // avoid to read more data that size of the buffer
+      if (byte_count > buff_size)
+        byte_count = buff_size;
+      
+      HAL_SPI_Receive_Opt(hspi, buffer, byte_count);
+      
+      len = byte_count;
+    }    
+  }
+  
+  // Release CS line.
+  HAL_GPIO_WritePin(BNRG_SPI_CS_PORT, BNRG_SPI_CS_PIN, GPIO_PIN_SET);
+  
+  __enable_irq();
+  
+#ifdef PRINT_CSV_FORMAT
+  if (len > 0) {
+    print_csv_time();
+    for (int i=0; i<len; i++) {
+      PRINT_CSV(" %02x", buffer[i]);
+    }
+    PRINT_CSV("\n");
+  }
+#endif  
+  
+  return len;
+	
+#else /* not OPTIMIZED_SPI */
   uint16_t byte_count;
   uint8_t len = 0;
   uint8_t char_ff = 0xff;
@@ -303,7 +392,7 @@ int32_t BlueNRG_SPI_Read_All(SPI_HandleTypeDef *hspi, uint8_t *buffer,
 
   /* Read the header */  
   HAL_SPI_TransmitReceive(hspi, header_master, header_slave, HEADER_SIZE, TIMEOUT_DURATION);
-  
+  	
   if (header_slave[0] == 0x02) {
     /* device is ready */
     byte_count = (header_slave[4]<<8)|header_slave[3];
@@ -315,10 +404,11 @@ int32_t BlueNRG_SPI_Read_All(SPI_HandleTypeDef *hspi, uint8_t *buffer,
         byte_count = buff_size;
       }
   
-      for (len = 0; len < byte_count; len++){
-        HAL_SPI_TransmitReceive(hspi, &char_ff, (uint8_t*)&read_char, 1, TIMEOUT_DURATION);
-        buffer[len] = read_char;
-      }
+      for (len = 0; len < byte_count; len++){                                               
+        HAL_SPI_TransmitReceive(hspi, &char_ff, (uint8_t*)&read_char, 1, TIMEOUT_DURATION); 
+        buffer[len] = read_char;                                                            
+      }                                                                                     
+      
     }    
   }
   /* Release CS line */
@@ -336,9 +426,10 @@ int32_t BlueNRG_SPI_Read_All(SPI_HandleTypeDef *hspi, uint8_t *buffer,
     }
     PRINT_CSV("\n");
   }
-#endif
+#endif /* OPTIMIZED_SPI */
   
-  return len;   
+  return len;  
+#endif
 }
 
 /**
@@ -353,8 +444,54 @@ int32_t BlueNRG_SPI_Read_All(SPI_HandleTypeDef *hspi, uint8_t *buffer,
 int32_t BlueNRG_SPI_Write(SPI_HandleTypeDef *hspi, uint8_t* data1,
                           uint8_t* data2, uint8_t Nb_bytes1, uint8_t Nb_bytes2)
 {  
-  int32_t result = 0;
+#ifdef OPTIMIZED_SPI /* used by the server (L0 and F4, not L4) for the throughput test */
+  int16_t result = 0;
+  uint16_t tx_bytes;
+  uint8_t rx_bytes;
   
+  const uint8_t header_master[5] = {0x0a, 0x00, 0x00, 0x00, 0x00};
+  uint8_t header_slave[5]  = {0x00};
+  
+  HAL_GPIO_WritePin(BNRG_SPI_CS_PORT, BNRG_SPI_CS_PIN, GPIO_PIN_RESET);
+  
+  HAL_SPI_TransmitReceive_Opt(hspi, header_master, header_slave, HEADER_SIZE);
+  
+  if(header_slave[0] != 0x02){
+    result = -1;
+    goto failed; // BlueNRG not awake.
+  }
+  
+  rx_bytes = header_slave[1];
+  
+  if(rx_bytes < Nb_bytes1){
+    result = -2;
+    goto failed; // BlueNRG .      
+  }
+  
+  HAL_SPI_Transmit_Opt(hspi, data1, Nb_bytes1);
+  
+  rx_bytes -= Nb_bytes1;
+  
+  if(Nb_bytes2 > rx_bytes){
+    tx_bytes = rx_bytes;
+  }
+  else{
+    tx_bytes = Nb_bytes2;
+  }
+  
+  HAL_SPI_Transmit_Opt(hspi, data2, tx_bytes);
+  
+  result = tx_bytes;
+  
+failed:
+  
+  // Release CS line
+  HAL_GPIO_WritePin(BNRG_SPI_CS_PORT, BNRG_SPI_CS_PIN, GPIO_PIN_SET);
+  
+  return result;
+  
+#else /* not OPTIMIZED_SPI */
+  int32_t result = 0;  
   int32_t spi_fix_enabled = 0;
   
 #ifdef ENABLE_SPI_FIX
@@ -379,7 +516,7 @@ int32_t BlueNRG_SPI_Write(SPI_HandleTypeDef *hspi, uint8_t* data1,
 
     /* Assert CS line after at least 112us */
     us150Delay();
-}
+  }
 
   /* CS reset */
   HAL_GPIO_WritePin(BNRG_SPI_CS_PORT, BNRG_SPI_CS_PIN, GPIO_PIN_RESET);
@@ -389,7 +526,7 @@ int32_t BlueNRG_SPI_Write(SPI_HandleTypeDef *hspi, uint8_t* data1,
   
   if (spi_fix_enabled) {
     set_irq_as_input();
-}
+  }
 
   if (header_slave[0] == 0x02) {
     /* SPI is ready */
@@ -401,23 +538,26 @@ int32_t BlueNRG_SPI_Write(SPI_HandleTypeDef *hspi, uint8_t* data1,
       }
       if (Nb_bytes2 > 0) {
         HAL_SPI_TransmitReceive(hspi, data2, read_char_buf, Nb_bytes2, TIMEOUT_DURATION);
-}
+      }
 
     } else {
       /* Buffer is too small */
       result = -2;
-      }
+    }
   } else {
     /* SPI is not ready */
     result = -1;
-      }
-    
-    /* Release CS line */
+  }
+	
+  /* Release CS line */
   HAL_GPIO_WritePin(BNRG_SPI_CS_PORT, BNRG_SPI_CS_PIN, GPIO_PIN_SET);
     
   Enable_SPI_IRQ();
     
   return result;
+ 
+#endif	/* OPTIMIZED_SPI */
+
 }
       
 /**
@@ -471,6 +611,8 @@ static void us150Delay(void)
   for(volatile int i = 0; i < 35; i++)__NOP();
 #elif SYSCLK_FREQ == 32000000
   for(volatile int i = 0; i < 420; i++)__NOP();
+#elif SYSCLK_FREQ == 80000000
+  for(volatile int i = 0; i < 1072; i++)__NOP();
 #elif SYSCLK_FREQ == 84000000
   for(volatile int i = 0; i < 1125; i++)__NOP();
 #else
@@ -517,6 +659,86 @@ void Clear_SPI_EXTI_Flag(void)
 {  
   __HAL_GPIO_EXTI_CLEAR_IT(BNRG_SPI_EXTI_PIN);  
 }
+
+#ifdef OPTIMIZED_SPI
+/* used by the server (L0 and F4, not L4) for the throughput test */
+static void SPI_I2S_SendData(SPI_HandleTypeDef *hspi, uint8_t data)
+{
+  hspi->Instance->DR = data;
+}
+
+static  uint8_t SPI_I2S_ReceiveData(SPI_HandleTypeDef *hspi)
+{
+  return hspi->Instance->DR;
+}
+
+/**
+  * @brief  Transmit and Receive an amount of data in blocking mode 
+  * @param  hspi: pointer to a SPI_HandleTypeDef structure that contains
+  *                the configuration information for SPI module.
+  * @param  pTxData: pointer to transmission data buffer
+  * @param  pRxData: pointer to reception data buffer to be
+  * @param  Size: amount of data to be sent
+  * @retval HAL status
+  */
+HAL_StatusTypeDef HAL_SPI_TransmitReceive_Opt(SPI_HandleTypeDef *hspi, const uint8_t *pTxData, uint8_t *pRxData, uint8_t Size)
+{
+  uint8_t i;
+  
+  for (i = 0; i < Size; i++) {
+    SPI_I2S_SendData(hspi, *pTxData++); 
+    while(__HAL_SPI_GET_FLAG(hspi, SPI_FLAG_TXE) == RESET);
+    while(__HAL_SPI_GET_FLAG(hspi, SPI_FLAG_RXNE) == RESET);
+    *pRxData++ = SPI_I2S_ReceiveData(hspi);
+  }
+  
+  return HAL_OK;
+}
+
+/**
+  * @brief  Transmit an amount of data in blocking mode (optimized version)
+  * @param  hspi: pointer to a SPI_HandleTypeDef structure that contains
+  *                the configuration information for SPI module.
+  * @param  pData: pointer to data buffer
+  * @param  Size: amount of data to be sent
+  * @retval HAL status
+  */
+HAL_StatusTypeDef HAL_SPI_Transmit_Opt(SPI_HandleTypeDef *hspi, const uint8_t *pTxData, uint8_t Size)
+{
+  uint8_t i;
+  
+  for (i = 0; i < Size; i++) {
+    SPI_I2S_SendData(hspi, *pTxData++); 
+    while(__HAL_SPI_GET_FLAG(hspi, SPI_FLAG_TXE) == RESET);
+    while(__HAL_SPI_GET_FLAG(hspi, SPI_FLAG_RXNE) == RESET);
+    SPI_I2S_ReceiveData(hspi);
+  }
+  
+  return HAL_OK;
+}
+
+/**
+  * @brief  Receive an amount of data in blocking mode (optimized version)
+  * @param  hspi: pointer to a SPI_HandleTypeDef structure that contains
+  *                the configuration information for SPI module.
+  * @param  pData: pointer to data buffer
+  * @param  Size: amount of data to be sent
+  * @retval HAL status
+  */
+HAL_StatusTypeDef HAL_SPI_Receive_Opt(SPI_HandleTypeDef *hspi, uint8_t *pRxData, uint8_t Size)
+{
+  uint8_t i;
+  
+  for (i = 0; i < Size; i++) {
+    SPI_I2S_SendData(hspi, 0xFF); 
+    while(__HAL_SPI_GET_FLAG(hspi, SPI_FLAG_TXE) == RESET);
+    while(__HAL_SPI_GET_FLAG(hspi, SPI_FLAG_RXNE) == RESET);
+    *pRxData++ = SPI_I2S_ReceiveData(hspi);
+  }
+  
+  return HAL_OK;
+}
+#endif /* OPTIMIZED_SPI */
 
 /**
 * @}

@@ -19,6 +19,18 @@
 #include "compiler.h"
 #include "ble_status.h"
 
+/** @addtogroup Middlewares
+ *  @{
+ */
+
+/** @defgroup ST
+ *  @{
+ */
+ 
+/** @defgroup SimpleBlueNRG_HCI
+ *  @{
+ */
+ 
 /**
  *@addtogroup GATT GATT
  *@{
@@ -218,6 +230,17 @@ typedef __packed struct _charactFormat {
  * @}
  */
 
+ /**
+ * @}
+ */
+
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
 
 
 #endif /* __GATT_SERVER_H__ */
