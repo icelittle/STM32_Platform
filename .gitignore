@@ -31,6 +31,7 @@
 
 #user inf
 *.uvguix.*
+*.uvoptx
 
 # JLink setting
 JLinkSettings.ini
@@ -44,4 +45,5 @@ Listings/
 Objects/
 uvoptx/
 Output/
+DebugConfig/
 
