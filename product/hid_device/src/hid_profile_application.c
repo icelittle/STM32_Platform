@@ -194,13 +194,13 @@ void Profile_Appl_Evt_Notify (tNotificationEvent event,uint8_t evtLen,uint8_t* e
   {
     case EVT_HID_INITIALIZED:
     {
-      PRINTF(profiledbgfile,"EVT_HID_INITIALIZED\n");
+      PRINTF("EVT_HID_INITIALIZED\n");
       BLE_Profile_Write_DeviceState(APPL_INIT_DONE);
     }
     break;
     case EVT_BATT_LEVEL_READ_REQ:
     {
-      PRINTF(profiledbgfile,"EVT_BATT_LEVEL_READ_REQ\n");
+      PRINTF("EVT_BATT_LEVEL_READ_REQ\n");
       /* BAS service test: TC_CR_BV_01_C  */
       battRead = 0x01;
       battIdx = evtData[0];
@@ -209,11 +209,11 @@ void Profile_Appl_Evt_Notify (tNotificationEvent event,uint8_t evtLen,uint8_t* e
     break;
     case EVT_HID_UPDATE_CMPLT:
     {
-      PRINTF(profiledbgfile,"EVT_HID_UPDATE_CMPLT %x %x %x %x\n",evtData[0],evtData[1],evtData[2],evtData[3]);
+      PRINTF("EVT_HID_UPDATE_CMPLT %x %x %x %x\n",evtData[0],evtData[1],evtData[2],evtData[3]);
       BLE_Profile_Write_DeviceState(APPL_CONNECTED);
       if(battRead)
       {
-        PRINTF(profiledbgfile,"allow read\n");
+        PRINTF("allow read\n");
         Allow_BatteryLevel_Char_Read(battIdx);
         battRead = 0x00;
       }
@@ -445,7 +445,7 @@ void Init_Profile(void)
   appHidServData[1].bootModeDeviceType = BOOT_DEVICE_MOUSE_MASK;
   appHidServData[1].bootIpReportLenMax = 10;
   appHidServData[1].bootOpReportLenMax = 16;
-  PRINTF(profiledbgfile,"Initializing HID Device Profile \n" );*/
+  PRINTF("Initializing HID Device Profile \n" );*/
 
   if (HidDevice_Init (1, /* numOfHIDServices */
                       appHidServData, 
@@ -455,11 +455,11 @@ void Init_Profile(void)
                       0x01, 
                       BLE_Profiles_Evt_Notify_Cb) == BLE_STATUS_SUCCESS)
   {
-    PRINTF(profiledbgfile,"Initialized HID Device Profile \n" );
+    PRINTF("Initialized HID Device Profile \n" );
   }
   else
   {
-    PRINTF(profiledbgfile,"Failed HID Device Profile \n" );
+    PRINTF("Failed HID Device Profile \n" );
   }  
   
 }/* end Init_Profile() */
@@ -472,7 +472,7 @@ void Init_Profile(void)
  */
 void Advertize(void)
 {
-  PRINTF(profiledbgfile,"Test Application: advertize\n");
+  PRINTF("Test Application: advertize\n");
   
   uint8_t useBoundedDeviceList = 0;
   
@@ -556,7 +556,7 @@ static int HID_Application_Process(void)
 #if defined(APPL_UPDATE_INPUT_REPORT)
 
 #if defined(KEYBOARD_IP)
-      PRINTF(profiledbgfile,"Sending data...\n" );
+      PRINTF("Sending data...\n" );
       uint8_t ipRepVal[REPORT_IP_LEN_0] = {2,0,0,0,0,0,0,0};
 
       /* Press AB followed by 0 */
@@ -596,7 +596,7 @@ static int HID_Application_Process(void)
       HidDevice_Update_Boot_Mouse_Input_Report(0,10,mouseRepVal);
 
 #elif defined(APPL_UPDATE_BATTERY_LEVEL)
-      PRINTF(profiledbgfile,"HID_Device: APPL_UPDATE_BATTERY_LEVEL state (update battery level)\n");
+      PRINTF("HID_Device: APPL_UPDATE_BATTERY_LEVEL state (update battery level)\n");
       HidDevice_Update_Battery_Level(battIdx,98);
 
 #elif defined(APPL_UPDATE_SCAN_REFRESH_CHARAC)

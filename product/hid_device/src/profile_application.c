@@ -217,8 +217,8 @@ void BLE_Profiles_Evt_Notify_Cb(tNotificationEvent event, uint8_t evtLen, uint8_
 void BNRG_Profiles_Init(void)
 {
   int indx;
-  uint8_t  hwVersion;
-  uint16_t fwVersion;
+  uint8_t  hwVersion = 0;
+  uint16_t fwVersion = 0;
   uint8_t addr[BDADDR_SIZE] = {NULL};
  
   HCI_Init();
@@ -239,7 +239,7 @@ void BNRG_Profiles_Init(void)
    */
   BlueNRG_RST();
   
-  PRINTF("HWver %d, FWver %d", hwVersion, fwVersion);
+  PRINTF("HWver %d, FWver %d/n", hwVersion, fwVersion);
   
   if (hwVersion > 0x30) { /* X-NUCLEO-IDB05A1 expansion board is used */
     /*
