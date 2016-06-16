@@ -1,11 +1,10 @@
 /**
   ******************************************************************************
-  * @file    bluenrg_interface.h 
+  * @file    stm32xx_hal_timerserver_exti.h
   * @author  MCD Application Team
   * @version V1.0.0
-  * @date    04-July-2014
-  * @brief   This file provides code for the BlueNRG Expansion Board driver
-  *          based on STM32Cube HAL for STM32 Nucleo boards.
+  * @date    01-October-2014
+  * @brief   Header for stm32xx_timerserver.c module
   ******************************************************************************
   * @attention
   *
@@ -35,52 +34,82 @@
   *
   ******************************************************************************
   */
-/* Includes ------------------------------------------------------------------*/
-#include "bluenrg_interface.h"
 
-#include "debug.h"
-#include "ble_status.h"
-#include "hci.h"
-#include "stm32_bluenrg_ble.h"
-#include "gp_timer.h"
-#include "stm32_bluenrg_ble.h"
-#include "low_power_conf.h"
-#include "stm32xx_lpm.h"
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __STM32XX_HAL_TIMERSERVER_EXTI_H
+#define __STM32XX_HAL_TIMERSERVER_EXTI_H
 
-extern SPI_HandleTypeDef SpiHandle;
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
-volatile uint8_t send_measurement = 0;
-
-/**
-  * @brief  RTC Wake Up callback
-  * @param  RTC handle pointer
-  * @retval None
-  */
-void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc)
-{
-    uint32_t uwPRIMASK_Bit = __get_PRIMASK();	/**< backup PRIMASK bit */;
-  
-    /* Clear Wake Up Flag */
-    __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
-    __disable_irq();			/**< Disable all interrupts by setting PRIMASK bit on Cortex*/
-    send_measurement++;
-    __set_PRIMASK(uwPRIMASK_Bit);	/**< Restore PRIMASK bit*/
-    LPM_Mode_Request(eLPM_MAIN_LOOP_PROCESSES, eLPM_Mode_RUN);
-}
-
-/**
- * @brief  EXTI line detection callback.
- * @param  uint16_t Specifies the pins connected EXTI line
- * @retval None
+/** @addtogroup Middlewares
+ *  @{
  */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-  /* Clear Wake Up Flag */
-  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
-  
-  HCI_Isr();
-  
-  LPM_Mode_Request(eLPM_MAIN_LOOP_PROCESSES, eLPM_Mode_RUN);  
+
+/** @addtogroup ST
+ *  @{
+ */
+ 
+/** @addtogroup TimerServer
+ *  @{
+ */
+
+/** @defgroup STM32XX_HAL_TIMERSERVER_EXTI
+ *  @{
+ */
+ 
+/* Includes ------------------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
+/* Exported constants --------------------------------------------------------*/
+
+/** @defgroup STM32XX_HAL_TIMERSERVER_EXTI_Exported_Macros
+ *  @{
+ */
+/* Exported macros -----------------------------------------------------------*/
+ /**
+   * @brief  Set Rising edge in EXTI for Wakeup Timer.
+   * @param  None
+   * @retval None
+   */
+#ifdef STM32L053xx
+ #define __HAL_TIMERSERVER_EXTI_RTC_SET_WAKEUPTIMER_RISING_EDGE()   (EXTI->RTSR |= (RTC_EXTI_LINE_WAKEUPTIMER_EVENT))
+#endif
+ 
+#ifdef STM32L476xx
+ #define __HAL_TIMERSERVER_EXTI_RTC_SET_WAKEUPTIMER_RISING_EDGE()   (EXTI->RTSR1 |= (RTC_EXTI_LINE_WAKEUPTIMER_EVENT))
+#endif
+
+#ifdef STM32F401xE
+ #define __HAL_TIMERSERVER_EXTI_RTC_SET_WAKEUPTIMER_RISING_EDGE()   (EXTI->RTSR |= (RTC_EXTI_LINE_WAKEUPTIMER_EVENT))
+#endif
+   
+/**
+ * @}
+ */
+ 
+/* Exported functions ------------------------------------------------------- */
+
+/**
+ * @}
+ */
+ 
+/**
+ * @}
+ */
+ 
+/**
+ * @}
+ */
+ 
+/**
+ * @}
+ */
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /*__STM32XX_HAL_TIMERSERVER_EXTI_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

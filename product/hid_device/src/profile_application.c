@@ -55,12 +55,10 @@
 #include <hci_const.h>
 
 #include "profile_application.h"
-#include "low_power_conf.h"
 
 #include "bluenrg_aci.h"
 #include "bluenrg_interface.h"
-#include "main.h"
-#include "stm32xx_hal_app_rcc.h"
+//#include "stm32xx_hal_app_rcc.h"
 
 /** @addtogroup OSXSmartConnPS
  *  @{
@@ -158,17 +156,17 @@ void BLE_Profiles_Evt_Notify_Cb(tNotificationEvent event, uint8_t evtLen, uint8_
   {
   case EVT_MP_BLUE_INITIALIZED:
     {
-      APPL_MESG_DBG(profiledbgfile,"EVT_BLUE_INITIALIZED\n");
+      PRINTF(profiledbgfile,"EVT_BLUE_INITIALIZED\n");
     }
     break;
   case EVT_MP_ADVERTISING_TIMEOUT:
     {
-      APPL_MESG_DBG(profiledbgfile,"EVT_ADVERTISING_TIMEOUT\n");
+      PRINTF(profiledbgfile,"EVT_ADVERTISING_TIMEOUT\n");
     }
     break;
   case EVT_MP_CONNECTION_COMPLETE:
     {
-      APPL_MESG_DBG(profiledbgfile,"EVT_CONNECTION_COMPLETE\n");
+      PRINTF(profiledbgfile,"EVT_CONNECTION_COMPLETE\n");
       BLE_Profile_Write_DeviceState(APPL_CONNECTED);//uncommented for the time test case csp_bv_02_c(cts).
 
       //FIXME: L2CAP_CONN_UPD_REQ to be moved to its proper place
@@ -188,19 +186,19 @@ void BLE_Profiles_Evt_Notify_Cb(tNotificationEvent event, uint8_t evtLen, uint8_
     break;
   case EVT_MP_DISCONNECTION_COMPLETE:
     {
-      APPL_MESG_DBG(profiledbgfile,"EVT_DISCONNECTION_COMPLETE %x\n",evtData[0]);
+      PRINTF(profiledbgfile,"EVT_DISCONNECTION_COMPLETE %x\n",evtData[0]);
       BLE_Profile_Write_DeviceState(APPL_INIT_DONE);
     }
     break;
   case EVT_MP_PASSKEY_REQUEST:
     {
-      APPL_MESG_DBG(profiledbgfile,"EVT_PASSKEY_REQUEST\n");
+      PRINTF(profiledbgfile,"EVT_PASSKEY_REQUEST\n");
       BLE_Profile_Send_Pass_Key(111111);
     }
     break;
   case EVT_MP_PAIRING_COMPLETE:
     {
-      APPL_MESG_DBG(profiledbgfile,"EVT_PAIRING_COMPLETE\n");
+      PRINTF(profiledbgfile,"EVT_PAIRING_COMPLETE\n");
       BLE_Profile_Write_DeviceState(APPL_CONNECTED);
     }
     break;

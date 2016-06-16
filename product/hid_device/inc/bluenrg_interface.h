@@ -1,12 +1,12 @@
 /**
-******************************************************************************
-* @file    clock.c 
-* @author  CL
-* @version V1.0.0
-* @date    04-July-2014
-* @brief   
-******************************************************************************
-* @attention
+  ******************************************************************************
+  * @file    bluenrg_interface.h
+  * @author  CL
+  * @version V1.0.0
+  * @date    04-July-2014
+  * @brief   
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
   *
@@ -33,44 +33,21 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */
+  */ 
   
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __BLUENRG_INTERFACE_H_
+#define __BLUENRG_INTERFACE_H_
+
 /* Includes ------------------------------------------------------------------*/
-#include "bsp_common.h"
-#include "ble_clock.h"
+#include "stm32_bluenrg_ble.h"
+#include "hal_types.h"
 
-const uint32_t CLOCK_SECOND = 1000;
+void Hal_Write_Serial(const void* data1, const void* data2, int32_t n_bytes1,
+                      int32_t n_bytes2);
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 
-/**
- * @brief  Clock_Init
- * @param  None
- * @retval None
- */
-void Clock_Init(void)
-{
-  // FIXME: as long as Cube HAL is initialized this is OK
-  // Cube HAL default is one clock each 1 ms
-}
 
-/**
- * @brief  Clock_Time
- * @param  None
- * @retval tClockTime
- */
-tClockTime Clock_Time(void)
-{
-  return HAL_GetTick();
-}
-
-/**
- * @brief  Clock_Wait Wait for a multiple of 1 ms.
- * @param  int i
- * @retval None
- */
-void Clock_Wait(uint32_t i)
-{
-  HAL_Delay(i);
-}
+#endif //__BLUENRG_INTERFACE_H_
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-

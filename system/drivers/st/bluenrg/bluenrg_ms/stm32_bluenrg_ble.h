@@ -43,6 +43,10 @@
  extern "C" {
 #endif 
 
+#include "stm32f4xx_hal.h"
+#include "bsp_common.h"
+#define SYSCLK_FREQ 84000000
+	 
 // FIXME: add prototypes for BlueNRG here
 void BNRG_SPI_Init(void);
 void BlueNRG_RST(void);

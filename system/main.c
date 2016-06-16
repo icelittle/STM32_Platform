@@ -14,6 +14,17 @@
  *
  */
 #include "bsp_common.h"
+#include "hci.h"
+#include "osal.h"
+#include "profile_application.h"
+#include "debug.h"
+#include "bluenrg_utils.h"
+#include "bluenrg_interface.h"
+#include "stm32xx_timerserver.h" 
+#include <stdio.h>
+
+tProfileApplContext profileApplContext; /* Profile Application Context */
+RTC_HandleTypeDef hrtc;  /* RTC handler declaration */
 
 void GPIO_Init()
 {
@@ -42,20 +53,32 @@ void GPIO_Init()
 	
 }
 
+extern void on_ready(void);
+
 int main(void)
 {
 		uint32_t temp_i = 0;
 		bsp_init();
-    dispatch_init();
     on_ready();
-	  GPIO_Init();
+
+		/* Configure the RTC */
+//		TIMER_Init(&hrtc);
+//		TIMER_Create(eTimerModuleID_BlueNRG_Profile_App, &(profileApplContext.profileTimer_Id), eTimerMode_Repeated, 0);
+
+		/* Set current BlueNRG profile (HRM, HTM, GS, ...) */
+		Osal_MemSet(&profileApplContext,0,sizeof(tProfileApplContext));
+		BNRG_Set_Current_profile();
+		BNRG_Profiles_Init(); 
+		profileApplContext.initProfileFunc();
+		BLE_Profile_Write_DeviceState(APPL_UNINITIALIZED);
 	
     while(1)
   	{
-				if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1)) {
-						temp_i++;
-						printf("ok : %d!\r\n", temp_i);
-						HAL_Delay(20);
+				HCI_Process();
+				profileApplContext.profileStateMachineFunc();
+				if (Profile_Process_Q() == 0x00)
+				{
+						profileApplContext.profileApplicationProcessFunc();
 				}
     }
 }

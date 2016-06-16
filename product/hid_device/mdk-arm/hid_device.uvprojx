@@ -332,7 +332,7 @@
               <MiscControls>--C99 --gnu  -W#177</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F401xE,USE_STM32F4XX_NUCLEO,ENABLE_SPI_FIX,BLUENRG_MS,RTC_LSE,CANNON_V2,SENSOR_FIFO,NO_PRINTF,SERVER_ROLE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\system\bsp\cannon_v2;..\..\..\system\bsp\nucleo;..\..\..\system\middlewares\juma;..\..\..\system\middlewares\juma\sdk;..\..\..\system\middlewares\juma\sensor;..\..\..\system\middlewares\juma\device_lib_Juma_Cannon;..\..\..\system\middlewares\juma\dispatcher;..\..\..\system\middlewares\juma\low_power;..\..\..\system\cmsis\device\st\inc;..\..\..\system\cmsis\include;..\..\..\system\drivers\st\stm32f4xx_hal_driver\class\HID\inc;..\..\..\system\drivers\st\stm32f4xx_hal_driver\core\inc;..\..\..\system\drivers\st\bluenrg\bluenrg_ms;..\..\..\system\middlewares\st\bluenrg_ms\inc;..\..\..\system\drivers\st\common;..\..\..\system\drivers\st\hts221;..\..\..\system\drivers\st\lps25hb;..\..\..\system\drivers\st\lsm303agr;..\..\..\system\drivers\st\lsm6ds3;..\..\..\system\drivers\st\lps25h;..\sensor_tag;..\..\..\system\hal\stm32f4xx_hal_driver\inc</IncludePath>
+              <IncludePath>..\..\..\system\bsp\cannon_v2;..\..\..\system\bsp\nucleo;..\..\..\system\middlewares\juma;..\..\..\system\middlewares\juma\sdk;..\..\..\system\middlewares\juma\sensor;..\..\..\system\middlewares\juma\device_lib_Juma_Cannon;..\..\..\system\middlewares\juma\dispatcher;..\..\..\system\middlewares\juma\low_power;..\..\..\system\cmsis\device\st\inc;..\..\..\system\cmsis\include;..\..\..\system\drivers\st\stm32f4xx_hal_driver\class\HID\inc;..\..\..\system\drivers\st\stm32f4xx_hal_driver\core\inc;..\..\..\system\drivers\st\bluenrg\bluenrg_ms;..\..\..\system\middlewares\st\bluenrg_ms\inc;..\..\..\system\drivers\st\common;..\..\..\system\drivers\st\hts221;..\..\..\system\drivers\st\lps25hb;..\..\..\system\drivers\st\lsm303agr;..\..\..\system\drivers\st\lsm6ds3;..\..\..\system\drivers\st\lps25h;..\..\..\system\hal\stm32f4xx_hal_driver\inc;..\inc;..\ble_profiles\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -380,6 +380,36 @@
               <FileType>1</FileType>
               <FilePath>..\app.c</FilePath>
             </File>
+            <File>
+              <FileName>timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32xx_timerserver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\stm32xx_timerserver.c</FilePath>
+            </File>
+            <File>
+              <FileName>profile_application.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\profile_application.c</FilePath>
+            </File>
+            <File>
+              <FileName>hid_profile_application.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\hid_profile_application.c</FilePath>
+            </File>
+            <File>
+              <FileName>clock.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\clock.c</FilePath>
+            </File>
+            <File>
+              <FileName>BLEProfilesLib.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\ble_profiles\BLEProfilesLib.lib</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -395,16 +425,6 @@
         <Group>
           <GroupName>system/middlewares/juma</GroupName>
           <Files>
-            <File>
-              <FileName>bluenrg_sdk_api.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\system\middlewares\juma\sdk\bluenrg_sdk_api.c</FilePath>
-            </File>
-            <File>
-              <FileName>dispatch.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\system\middlewares\juma\dispatcher\dispatch.c</FilePath>
-            </File>
             <File>
               <FileName>stm32f401_lp_mode.c</FileName>
               <FileType>1</FileType>
